@@ -2,38 +2,23 @@
 {
     public class PrivateMethod
     {
-        private static Random _random = new Random();
+        private static readonly Random _random = new Random();
 
         public static string GenerateRequestTrackingNumber()
         {
             string prefix = "MAIN";
-            string datePart = DateTime.UtcNow.ToString("yyyy-MM-dd"); // e.g., 2025-08-26
-            string uniquePart = GenerateUniquePart();                 // e.g., AB#12345
+            string datePart = DateTime.UtcNow.ToString("yyyyMMdd"); // e.g., 20250826
+            string uniquePart = GenerateRandomAlphaNumericWithSymbols(8); // 8 chars with letters, numbers, symbols
 
             return $"{prefix}-{datePart}-{uniquePart}";
         }
 
-        private static string GenerateUniquePart()
+        private static string GenerateRandomAlphaNumericWithSymbols(int length)
         {
-            string alphaPart = GenerateRandomLetters(2);    // AB
-            string specialChar = GenerateSpecialCharacter(); // #
-            string numberPart = _random.Next(10000, 99999).ToString(); // 5 digits
-
-            return $"{alphaPart}{specialChar}{numberPart}";
-        }
-
-        private static string GenerateRandomLetters(int length)
-        {
-            const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            return new string(Enumerable.Repeat(letters, length)
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+            return new string(Enumerable.Repeat(chars, length)
                                         .Select(s => s[_random.Next(s.Length)])
                                         .ToArray());
-        }
-
-        private static string GenerateSpecialCharacter()
-        {
-            string specials = "#@$%&*!?";
-            return specials[_random.Next(specials.Length)].ToString();
         }
     }
 }
