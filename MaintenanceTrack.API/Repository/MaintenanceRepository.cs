@@ -2,6 +2,7 @@
 using MaintenanceTrack.API.DTO;
 using MaintenanceTrack.API.Interface;
 using MaintenanceTrack.API.Extension.Mapping;
+using Microsoft.EntityFrameworkCore;
 
 namespace MaintenanceTrack.API.Repository
 {
@@ -12,41 +13,49 @@ namespace MaintenanceTrack.API.Repository
         {
             _db = db;
         }
-        public CreateMaintenanceDto Createmaintence(CreateMaintenanceDto createMaintenanceDto)
+        public async Task<CreateMaintenanceDto> Createmaintence(CreateMaintenanceDto createMaintenanceDto)
         {
             var maintenance = MaintenanceMapper.CreateDtoToMaintenanceModel(createMaintenanceDto);
-            _db.Maintenances.Add(maintenance);
-            _db.SaveChanges();
+
+            var existingModel = _db.Maintenances.FirstOrDefault(x => x.Title == maintenance.Title);
+
+            if (existingModel != null)
+            {
+                throw new Exception("Title name already eist");
+            }
+            await _db.Maintenances.AddAsync(maintenance);
+            await _db.SaveChangesAsync();
             return createMaintenanceDto;
         }
 
-        public void DeleteMaintenance(int id)
+        public async void DeleteMaintenance(int id)
         {
-            var maintenanceExist = _db.Maintenances.FirstOrDefault(x => x.Id == id);
+            var maintenanceExist = await _db.Maintenances.FirstOrDefaultAsync(x => x.Id == id);
             if (maintenanceExist == null)
             {
                 throw new Exception("The Id is not in the database");
             }
             _db.Maintenances.Remove(maintenanceExist);
-            _db.SaveChanges();
+           await _db.SaveChangesAsync();
         }
 
-        public List<GetMaintenanceDto> GetAll()
+        public async Task<List<GetMaintenanceDto>> GetAll()
         {
-            var getAll = _db.Maintenances
+            var getAll =await _db.Maintenances
                            .Select(m =>m.MaintenanceModelToGetDto())
-                           .ToList();
+                           .ToListAsync();
 
             return getAll;
             
         }
 
-        public GetMaintenanceDto GetMaintenanceById(int id)
+        public async Task<GetMaintenanceDto> GetMaintenanceById(int id)
         {
-            var byId = _db.Maintenances.FirstOrDefault(m => m.Id == id);
+            var byId = await _db.Maintenances.FirstOrDefaultAsync(m => m.Id == id);
             if (byId == null) 
             {
-                throw new Exception("This Id does not exist on the database");
+                return null;
+                
             }
 
             return byId.MaintenanceModelToGetDto();
@@ -54,30 +63,30 @@ namespace MaintenanceTrack.API.Repository
 
         }
 
-        public GetMaintenanceByTrackingNumberDto GetMaintenanceByTrackingNumber(string requestTrackingNumber)
+        public async Task<GetMaintenanceByTrackingNumberDto> GetMaintenanceByTrackingNumber(string requestTrackingNumber)
         {
-            var trackingExist = _db.Maintenances
-                                   .FirstOrDefault(m => m.RequestTrackingNumber == requestTrackingNumber);
+            var trackingExist = await _db.Maintenances
+                                   .FirstOrDefaultAsync(m => m.RequestTrackingNumber == requestTrackingNumber);
 
             if (trackingExist == null)
             {
-                throw new Exception("This Tracking number does not exist in the database");
+                return null;
             }
 
             return trackingExist.MaintenanceEntityToGetDto();
         }
 
 
-        public void UpdateMaintenance(int id, UpdateMaintenanceDto updateMaintenanceDto)
+        public async void UpdateMaintenance(int id, UpdateMaintenanceDto updateMaintenanceDto)
         {
-            var maintenanceExist = _db.Maintenances.FirstOrDefault(x => x.Id == id);
+            var maintenanceExist =await _db.Maintenances.FirstOrDefaultAsync(x => x.Id == id);
             if(maintenanceExist == null)
             {
                 throw new Exception("The Id is not in the database");
             }
             maintenanceExist.UpdateMaintenance(updateMaintenanceDto);
             _db.Maintenances.Update(maintenanceExist);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
         

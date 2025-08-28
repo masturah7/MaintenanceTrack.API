@@ -16,29 +16,39 @@ namespace MaintenanceTrack.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateMaintenance([FromBody] CreateMaintenanceDto createMaintenanceDto )
+        public async Task<IActionResult> CreateMaintenance([FromBody] CreateMaintenanceDto createMaintenanceDto )
         {
-            var response = _repo.Createmaintence(createMaintenanceDto);
+            var response = await _repo.Createmaintence(createMaintenanceDto);
             return Ok(response);    
         }
         [HttpGet("all")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var get=_repo.GetAll();
+            var get=await _repo.GetAll();
             return Ok(get);
         }
         [HttpGet("{id}")]
-        public IActionResult Get(int id) 
+        public async Task<IActionResult> Get(int id) 
         {
-            var getById = _repo.GetMaintenanceById(id);
+            var getById = await _repo.GetMaintenanceById(id);
+
+            if (getById == null)
+            {
+                return NotFound("This Id IS NOT AVAILABLE IN THE DB CHECK AGAIN");
+            }
+
             return Ok(getById);
         }
 
         [HttpGet("by-tracking/{trackingNumber}")]
-        public IActionResult GetByTrackingNumber(string trackingNumber)
+        public async Task<IActionResult> GetByTrackingNumber(string trackingNumber)
         {
             {
-                var number = _repo.GetMaintenanceByTrackingNumber(trackingNumber);
+                var number = await _repo.GetMaintenanceByTrackingNumber(trackingNumber);
+                if (number == null)
+                {
+                    return NotFound("This TrackingNumber does not exist on the database");
+                }
                 return Ok(number);
             }
         }
@@ -46,13 +56,13 @@ namespace MaintenanceTrack.API.Controllers
         
             [HttpPut("{id}")]
 
-        public IActionResult UpdateMaintenances([FromRoute] int id, [FromBody] UpdateMaintenanceDto updateMaintenanceDto)
+        public async Task<IActionResult> UpdateMaintenances([FromRoute] int id, [FromBody] UpdateMaintenanceDto updateMaintenanceDto)
         {
             _repo.UpdateMaintenance(id, updateMaintenanceDto);
             return NoContent();
         }
         [HttpDelete]
-        public IActionResult DeleteMaintenance(int id) 
+        public async Task<IActionResult>  DeleteMaintenance(int id) 
         {
             _repo.DeleteMaintenance(id);
             return NoContent();
