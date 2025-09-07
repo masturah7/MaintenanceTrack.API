@@ -10,7 +10,7 @@ namespace MaintenanceTrack.API.Extension.Services
         public static void AddServices(this IServiceCollection service, IConfiguration configuration)
         {
             service.AddScoped<IMaintenanceRepository, MaintenanceRepository>();
-
+            service.AddScoped<IAuthManager,AuthManager>();
             var ConnectionString = configuration.GetConnectionString("MaintenanceConnectionString");
             service.AddDbContext<MaintenanceDbContext>(Options => Options.UseSqlServer(ConnectionString));
 
